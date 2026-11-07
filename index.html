@@ -1,0 +1,275 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exrecise Time </title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;min-height:100vh;color:#fff;font-family:Arial,sans-serif;
+ background:linear-gradient(-45deg,#080b20,#171039,#240b2c,#0d0b1d);
+ background-size:400% 400%;animation:bg 14s ease infinite;
+ overflow-x:hidden;padding:22px 14px 40px;position:relative
+}
+@keyframes bg{0%,100%{background-position:0 50%}50%{background-position:100% 50%}}
+
+body:after{
+ content:"";position:fixed;width:300px;height:300px;border-radius:50%;
+ filter:blur(100px);opacity:.35;pointer-events:none;z-index:-1;
+ background:#ff00a8;bottom:3%;right:-50px;
+ animation:float 9s ease-in-out infinite alternate
+}
+@keyframes float{to{transform:translate(-50px,-50px) scale(1.3)}}
+
+header{text-align:center;margin:12px 0 26px;animation:fadeInDown 1s ease both}
+@keyframes fadeInDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:none}}
+
+.logo{font-size:42px;font-weight:900;letter-spacing:8px;
+ background:linear-gradient(90deg,#ff35bb,#ffe45c,#62ff9a,#ff35bb);
+ background-size:200% auto;
+ background-clip:text;-webkit-background-clip:text;color:transparent;
+ animation:shine 4s linear infinite}
+@keyframes shine{to{background-position:200% center}}
+
+.subtitle{color:#b8c5e9;letter-spacing:4px;font-size:11px;margin-top:8px;animation:pulseText 2s ease-in-out infinite alternate}
+@keyframes pulseText{from{opacity:0.7}to{opacity:1}}
+
+.grid{max-width:900px;margin:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.card{
+ position:relative;overflow:hidden;min-height:150px;padding:22px;
+ border:1px solid var(--c);border-radius:24px;
+ background:rgba(255,255,255,0.05);
+ box-shadow:0 8px 32px 0 rgba(0,0,0,0.37);
+ backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+ transition:transform .3s ease, box-shadow .3s ease;
+ animation:appear .8s ease both;
+}
+.card:hover{
+ transform:translateY(-6px);
+ box-shadow:0 10px 25px var(--c);
+}
+.card:before{content:"";position:absolute;inset:-100%;
+ background:linear-gradient(110deg,transparent 43%,rgba(255,255,255,0.15) 50%,transparent 57%);
+ animation:sweep 6s linear infinite;pointer-events:none}
+@keyframes sweep{to{transform:translate(100%,100%)}}
+@keyframes appear{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+
+.card h2{font-size:14px;letter-spacing:2px;color:var(--c);margin:0 0 15px}
+.value{font-size:30px;font-weight:800;letter-spacing:1px}
+.small{font-size:12px;color:#c3c9dc;margin-top:8px;line-height:1.4}
+
+button,.app{
+ border:1px solid var(--c);color:#fff;background:rgba(255,255,255,0.08);
+ border-radius:14px;padding:10px 16px;font-weight:bold;cursor:pointer;
+ transition:all .3s ease;text-decoration:none;display:inline-block;margin:8px 6px 0 0;
+}
+button:hover,.app:hover{
+ background:var(--c);color:#080b20;transform:translateY(-3px);
+ box-shadow:0 0 18px var(--c);
+}
+
+.clock{--c:#ffe45c;grid-column:span 2;text-align:center}
+.clock .value{
+ font-size:clamp(38px,8vw,65px);color:#ffe45c;
+ text-shadow:0 0 20px rgba(255,228,92,0.6);
+}
+
+.steps{--c:#9cff45}
+.weather{--c:#ffca4b}
+.stopwatch{--c:#ff58c7}
+.apps{--c:#9c8cff;grid-column:span 2}
+.date{color:#c4d5f3;font-size:15px;margin-top:8px}
+
+#weatherInfo{font-size:20px;font-weight:bold;margin-top:8px}
+#stepCount{font-size:42px;font-weight:900;color:#9cff45}
+.app{padding:16px 20px;min-width:110px;text-align:center}
+
+footer{text-align:center;color:#aab3ce;font-size:11px;letter-spacing:3px;margin-top:35px}
+
+@media(max-width:520px){
+ .grid{grid-template-columns:1fr;gap:12px}
+ .clock,.apps{grid-column:span 1}
+ .card{padding:18px;min-height:130px}
+}
+</style>
+</head>
+<body>
+
+<header>
+ <div class="logo">Fitness Time</div>
+ <div class="subtitle">YOUR PERSONAL CONTROL CENTER</div>
+</header>
+
+<main class="grid">
+ <section class="card clock">
+  <h2>✦ LIVE DIGITAL CLOCK</h2>
+  <div class="value" id="clock">12:00:00 AM</div>
+  <div class="date" id="date">Loading...</div>
+ </section>
+
+ <section class="card steps">
+  <h2>👣 STEP COUNTER</h2>
+  <div id="stepCount">0</div>
+  <div class="small" id="stepStatus">Tap Start to enable motion sensor</div>
+  <button onclick="startSteps()">Start Counter</button>
+  <button onclick="resetSteps()">Reset</button>
+ </section>
+
+ <section class="card weather">
+  <h2>🌤 LIVE WEATHER</h2>
+  <div id="weatherInfo">Loading weather...</div>
+  <div class="small" id="weatherPlace">Checking location...</div>
+  <button onclick="getWeather()">Refresh Weather</button>
+ </section>
+
+ <section class="card stopwatch">
+  <h2>⏱ STOPWATCH</h2>
+  <div class="value" id="watch">00:00:00</div>
+  <button onclick="startWatch()">Start</button>
+  <button onclick="pauseWatch()">Stop</button>
+  <button onclick="resetWatch()">Reset</button>
+ </section>
+
+ <section class="card apps">
+  <h2>🚀 QUICK APP LAUNCHER</h2>
+  <a class="app" style="--c:#48a7ff" href="https://www.google.com" target="_blank">🌐 Google</a>
+  <a class="app" style="--c:#ff4545" href="https://www.youtube.com" target="_blank">▶ YouTube</a>
+  <a class="app" style="--c:#e96acb" href="https://www.instagram.com" target="_blank">◎ Instagram</a>
+ </section>
+</main>
+
+<footer>DIGITAL Fitness</footer>
+
+<script>
+//1. Live Clock
+function updateClock(){
+ const now = new Date();
+ document.getElementById("clock").innerHTML = now.toLocaleTimeString("en-US", {hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:true});
+ document.getElementById("date").innerHTML = now.toLocaleDateString("en-US", {weekday:"long", year:"numeric", month:"long", day:"numeric"});
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+// 2. Weather
+function getWeather(){
+ const info = document.getElementById("weatherInfo");
+ const place = document.getElementById("weatherPlace");
+ info.innerHTML = "Fetching...";
+ 
+ function loadData(lat, lon, cityName){
+  fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m`)
+   .then(res => res.json())
+   .then(data => {
+    const w = data.current;
+    const icons = {0:"☀️",1:"🌤️",2:"⛅",3:"☁️",45:"🌫️",51:"🌦️",61:"🌧️",71:"🌨️",95:"⛈️"};
+    info.innerHTML = `${icons[w.weather_code] || "🌡️"} ${w.temperature_2m}°C`;
+    place.innerHTML = `${cityName} • Feels ${w.apparent_temperature}°C`;
+   })
+   .catch(() => {
+    info.innerHTML = "☀️ 26°C";
+    place.innerHTML = "Location: Default City";
+   });
+ }
+
+ if(navigator.geolocation){
+  navigator.geolocation.getCurrentPosition(
+   pos => loadData(pos.coords.latitude, pos.coords.longitude, "Your Location"),
+   () => loadData(28.6139, 77.2090, "New Delhi (Default)")
+  );
+ } else {
+  loadData(28.6139, 77.2090, "New Delhi (Default)");
+ }
+}
+getWeather();
+
+// 3. Stopwatch
+let elapsed = 0, startTime = 0, watchTimer = null;
+function renderWatch(){
+ let total = Math.floor(elapsed / 1000);
+ let h = String(Math.floor(total / 3600)).padStart(2, "0");
+ let m = String(Math.floor((total % 3600) / 60)).padStart(2, "0");
+ let s = String(total % 60).padStart(2, "0");
+ document.getElementById("watch").innerHTML = `${h}:${m}:${s}`;
+}
+function startWatch(){
+ if(watchTimer) return;
+ startTime = Date.now();
+ watchTimer = setInterval(() => {
+  elapsed += Date.now() - startTime;
+  startTime = Date.now();
+  renderWatch();
+ }, 200);
+}
+function pauseWatch(){ clearInterval(watchTimer); watchTimer = null; }
+function resetWatch(){ pauseWatch(); elapsed = 0; renderWatch(); }
+
+// 4. Step Counter Connected to Mobile Motion Sensor
+let steps = 0;
+let lastMagnitude = 0;
+let lastTime = 0;
+let isTracking = false;
+
+async function startSteps(){
+ const status = document.getElementById("stepStatus");
+ 
+ if (typeof window.DeviceMotionEvent !== 'undefined') {
+  // Check if permission is needed (iOS 13+ devices)
+  if (typeof DeviceMotionEvent.requestPermission === 'function') {
+   try {
+    const response = await DeviceMotionEvent.requestPermission();
+    if (response === 'granted') {
+     activateMotionListener();
+    } else {
+     status.innerHTML = "Motion permission denied.";
+    }
+   } catch (e) {
+    status.innerHTML = "Error accessing motion sensor.";
+   }
+  } else {
+   // Android and other devices
+   activateMotionListener();
+  }
+ } else {
+  status.innerHTML = "Motion sensor not supported on this browser/device.";
+ }
+}
+
+function activateMotionListener(){
+ isTracking = true;
+ document.getElementById("stepStatus").innerHTML = "Sensor Active • Walk with phone";
+ window.addEventListener('devicemotion', handleMotion);
+}
+
+function handleMotion(event){
+ if (!isTracking) return;
+ const acc = event.accelerationIncludingGravity;
+ if (!acc) return;
+
+ const magnitude = Math.sqrt((acc.x || 0) ** 2 + (acc.y || 0) ** 2 + (acc.z || 0) ** 2);
+ const currentTime = Date.now();
+
+ // Threshold to detect walking step motion
+ if (magnitude > 12.0 && lastMagnitude <= 12.0 && (currentTime - lastTime > 300)) {
+  steps++;
+  document.getElementById("stepCount").innerHTML = steps;
+  lastTime = currentTime;
+ }
+ lastMagnitude = magnitude;
+}
+
+function resetSteps(){
+ isTracking = false;
+ if (typeof window.DeviceMotionEvent !== 'undefined') {
+  window.removeEventListener('devicemotion', handleMotion);
+ }
+ steps = 0;
+ document.getElementById("stepCount").innerHTML = "0";
+ document.getElementById("stepStatus").innerHTML = "Tap Start to enable motion sensor";
+}
+</script>
+</body>
+</html>
+
+   
